@@ -99,7 +99,7 @@ res.send(arryOfParks);
 }
 function Parks(data){
   this.name=data.name;
-  this.address=Object.values(data.addresses[0]);
+  this.address=data.address;
   this.fee =data.fees;
   this.description=data.description;
   this.url=data.url;
