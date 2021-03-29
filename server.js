@@ -13,6 +13,10 @@ app.get('/location',handelLocationReq);
 app.get('/weather',handelWeatherReq);
 function handelLocationReq(req,res){
 const searchQuery = req.query.city;
+if(!searchQuery){
+  res.status(500).send('Sorry, something went wrong');
+
+}
 const locationData= require('./data/location.json');
 const location = new Location(locationData[0],searchQuery);
 res.send(location);
@@ -40,8 +44,8 @@ this.time=day.datetime;
 }
 // error message 
 
-app.use('/*' , function(req , res){
-  res.status(500).send('Sorry, something went wrong');
+app.use('*' , function(req , res){
+  res.send('noting to show here');
 });
 
 app.listen(PORT, () => console.log(`Listening to Port ${PORT}`));//start point for the application"initialisation"
