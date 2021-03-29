@@ -6,8 +6,8 @@ const express = require('express');//from node modules
 const superagent = require('superagent');
 const cors = require('cors');//from node modules
 const { query } = require('express');
-const PORT =process.env.PORT ;
-const GEOCODE_API_KEY=process.env.GEOCODE_API_KEY;
+const PORT =process.env.PORT ||5050 ;
+const GEOCODE_API_KEY=process.env.GEOCODE_API_KEY ||;
 const WEATHER_API_KEY=process.env.WEATHER_API_KEY;
 const PARKS_API_KEY=process.env.PARKS_API_KEY;
 
