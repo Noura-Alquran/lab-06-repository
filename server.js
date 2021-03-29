@@ -4,22 +4,25 @@ require('dotenv').config();
 // Application dependencies
 const express = require('express');//from node modules
 const cors = require('cors');//from node modules
-let PORT =process.env.PORT;
+const { query } = require('express');
+let PORT =process.env.PORT || 3000;
 const app=express(); //create new instance for express //express is a framework
 app.use(cors());
 
 app.get('/location',handelLocationReq);
 app.get('/weather',handelWeatherReq);
 function handelLocationReq(req,res){
-const searchQuery = req.query;
+const searchQuery = req.query.city;
 const locationData= require('./data/location.json');
-const location = new Location(locationData[0]);
+const location = new Location(locationData[0],searchQuery);
 res.send(location);
 }
-function Location(data){
-this.display_name = data.display_name;
+function Location(data,searchQuery){
+this.search_query=searchQuery;
+this.formatted_query = data.display_name;
 this.latitude = data.lat;
 this.longitude = data.lon;
+
 }
 
 function handelWeatherReq(req,res){
@@ -36,7 +39,8 @@ this.forecast=day.weather.description;
 this.time=day.datetime;   
 }
 // error message 
-app.get('/*' , function(req , res){
+
+app.use('/*' , function(req , res){
   res.status(500).send('Sorry, something went wrong');
 });
 
