@@ -85,22 +85,24 @@ this.time=day.datetime;
 }
 
 function handelParkReq(req,res){
-const url=`https://developer.nps.gov/api/v1/parks?parkCode=${req.query.city}&api_key=${PARKS_API_KEY}`;
+const url=`https://developer.nps.gov/api/v1/parks?q=${req.query.city}&api_key=${PARKS_API_KEY}&limit=10`;
 superagent.get(url).then(resData=> {
 const arryOfParks=[];
-resData.body.data.map(element=>{
+resData.body.data.map(element=> {
  arryOfParks.push(new Parks(element));
- return arryOfParks ;
-});
+ console.log(arryOfParks);
+return arryOfParks ;
+}); 
 res.send(arryOfParks);
 }).catch((error) =>{
   res.send('Sorry, something went wrong');
 });
 }
 function Parks(data){
-  this.name=data.name;
-  this.address=data.address;
-  this.fee =data.fees;
+  this.name = data.name;
+  this.address=`${data.addresses[0].linel} ${data.addresses[0].city} ${data.addresses[0].stateCode} ${data.addresses[0].postalCode}`;
+  // this.address=Object.values(data.addresses[0]).join(',');
+  this.fee =data.fees[0]||'0.00';
   this.description=data.description;
   this.url=data.url;
 }
