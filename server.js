@@ -3,6 +3,7 @@
 require('dotenv').config();
 // Application dependencies
 const express = require('express');//from node modules
+const pg=require('pg');
 const superagent = require('superagent');
 const cors = require('cors');//from node modules
 const { query } = require('express');
@@ -10,10 +11,11 @@ const PORT =process.env.PORT ||5050 ;
 const GEOCODE_API_KEY=process.env.GEOCODE_API_KEY;
 const WEATHER_API_KEY=process.env.WEATHER_API_KEY;
 const PARKS_API_KEY=process.env.PARKS_API_KEY;
+const DATABASE_URL = process.env.DATABASE_URL;
 
 const app=express(); //create new instance for express //express is a framework
 app.use(cors());
-
+const client = new pg.Client(DATABASE_URL);
 app.get('/location',handelLocationReq);
 app.get('/weather',handelWeatherReq);
 app.get('/parks',handelParkReq);
@@ -85,7 +87,7 @@ this.time=day.datetime;
 }
 
 function handelParkReq(req,res){
-const url=`https://developer.nps.gov/api/v1/parks?parkCode=${req.query.city}&api_key=${PARKS_API_KEY}`;
+const url=`https://developer.nps.gov/api/v1/parks?parkCode=${req.query.city}&api_key=${PARKS_API_KEY}&&limit=10`;
 superagent.get(url).then(resData=> {
 const arryOfParks=[];
 resData.body.data.map(element=>{
@@ -108,4 +110,10 @@ app.use('*' , function(req , res){
   res.send('noting to show here');
 });
 
-app.listen(PORT, () => console.log(`Listening to Port ${PORT}`));//start point for the application"initialisation"
+
+client.connect().then(() => {
+  app.listen(PORT, () => {
+    console.log("Connected to database:", Client.connectionParameters.database) //show what database we connected to
+    console.log(`Listening to Port ${PORT}`);//start point for the application"initialisation"
+  });
+})
