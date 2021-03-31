@@ -15,7 +15,12 @@ const DATABASE_URL = process.env.DATABASE_URL;
 
 const app=express(); //create new instance for express //express is a framework
 app.use(cors());
-const client = new pg.Client(DATABASE_URL);
+const client = new pg.Client({
+  connectionString: DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 app.get('/location',handelLocationReq);
 app.get('/weather',handelWeatherReq);
 app.get('/parks',handelParkReq);
