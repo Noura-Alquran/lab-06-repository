@@ -7,24 +7,28 @@ const pg=require('pg');
 const superagent = require('superagent');
 const cors = require('cors');//from node modules
 const { query } = require('express');
-const PORT =process.env.PORT ;
+const PORT =process.env.PORT;
 const GEOCODE_API_KEY=process.env.GEOCODE_API_KEY;
 const WEATHER_API_KEY=process.env.WEATHER_API_KEY;
 const PARKS_API_KEY=process.env.PARKS_API_KEY;
 const DATABASE_URL = process.env.DATABASE_URL;
-
+const MOVIE_API_KEY = process.env.MOVIE_API_KEY;
+const YELP_API_KEY = process.env.YELP_API_KEY;
 const app=express(); //create new instance for express //express is a framework
 app.use(cors());
-const client = new pg.Client({
-  connectionString: DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+// const client = new pg.Client({
+//   connectionString: DATABASE_URL,
+//   ssl: {
+//     rejectUnauthorized: false
+//   }
+// });
+const client = new pg.Client(process.env.DATABASE_URL);
+
 app.get('/location',handelLocationReq);
 app.get('/weather',handelWeatherReq);
 app.get('/parks',handelParkReq);
-
+app.get('/movies',handelMovieReq);
+app.get('/yelp',handelShowRestu);
 function handelLocationReq(req, res) {
   const city = req.query.city;
  if(!city) {
@@ -86,13 +90,13 @@ this.time=day.datetime;
 
 function handelParkReq(req,res){
 const url=`https://developer.nps.gov/api/v1/parks?parkCode=${req.query.city}&api_key=${PARKS_API_KEY}&&limit=10`;
-superagent.get(url).then(resData=> {
 const arryOfParks=[];
-resData.body.data.map(element=>{
+superagent.get(url).then(resData=> {
+let data=resData.body.data.map(element=>{
  arryOfParks.push(new Parks(element));
  return arryOfParks ;
 });
-res.send(arryOfParks);
+res.send(data);
 }).catch((error) =>{
   res.send('Sorry, something went wrong');
 });
@@ -104,6 +108,57 @@ function Parks(data){
   this.description=data.description;
   this.url=data.url;
 }
+
+
+
+function handelMovieReq(req,res){
+const url=`https://api.themoviedb.org/3/search/movie?api_key=${MOVIE_API_KEY}&query=${req.query.city}`;
+const arrayMovies=[];
+superagent.get(url).then(resData=>{
+let data=resData.body.results.map(element=>{
+  arrayMovies.push(new Movie(element));
+  return arrayMovies ;
+})
+res.send(data);
+}).catch((error)=>{
+res.send('Sorry, something went wrong');
+
+})
+
+}
+function Movie (data){
+  this.title=data.title;
+  this.overview=data.overview;
+  this.average_votes=data.average_votes;
+  this.total_votes=data.total_votes;
+  this.image_url=`https://image.tmdb.org/t/p/w500${data.poster_path}`;
+  this.popularity=data.popularity;
+  this.released_on=data.released_on;
+}
+
+function handelShowRestu(req,res){
+    const url =`https://api.yelp.com/v3/businesses/search?term=restaurants&latitude=${req.query.latitude}&longitude=${req.query.longitude}&limit=20`;
+    const arrayOfYelp=[]
+    superagent.get(url).set(YELP_API_KEY).then(resData=>{
+    let data=resData.body.businesses.map(element=>{
+      arrayOfYelp.push( new Yelp(element));
+       return arrayOfYelp;
+    });
+      res.send(data);
+    }).catch((error)=>{
+      res.send('Sorry, something went wrong');
+      
+  })}
+
+  function Yelp(data){
+    this.name=data.name;
+    this.image_url=data.image_url;
+    this.price=data.price;
+    this.rating=data.rating;
+    this.url=data.url;
+  }
+
+
 app.use('*' , function(req , res){
   res.send('noting to show here');
 });
