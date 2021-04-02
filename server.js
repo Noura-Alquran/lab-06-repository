@@ -74,9 +74,10 @@ function handelWeatherReq(req,res){
     superagent.get(url).then(resData=> {
     const weatherArr=[];
     resData.body.data.map(element => {
+    if (weatherArr.length<8){
     weatherArr.push(new Weather(element));
      return weatherArr;
-      });
+    }});
       res.send(weatherArr);
     }).catch((error) =>{
       res.send('Sorry, something went wrong');
