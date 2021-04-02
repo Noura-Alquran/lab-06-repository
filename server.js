@@ -46,33 +46,16 @@ function Location(city, geoData) {
   this.longitude = geoData.lon;
 
 }
-// function handelWeatherReq(req,res){
-// const url='https://api.weatherbit.io/v2.0/forecast/daily'
-// const weatherQueryParam= {
-//   key: WEATHER_API_KEY,
-//   q:city,
-//   format: 'json',
-// };
-// superagent.get(url).query(weatherQueryParam).then(res => {
-// const weatherArr=[];
-// res.body.data.map(element => {
-//  weatherArr.push(new Weather(element))
-// return weatherArr;
-// console.log(weatherArr);
-// });
-// res.send(weatherArr); 
-// }).catch((error) =>{
-//   res.send('Sorry, something went wrong');
-// });
-// }
+
 function handelWeatherReq(req,res){
     const url = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${req.query.latitude}&lon=${req.query.longitude}&key=${WEATHER_API_KEY}`;
     superagent.get(url).then(resData=> {
     const weatherArr=[];
     resData.body.data.map(element => {
+      if(weatherArr.length<8){
     weatherArr.push(new Weather(element));
      return weatherArr;
-      });
+    }});
       res.send(weatherArr);
     }).catch((error) =>{
       res.send('Sorry, something went wrong');
@@ -85,7 +68,7 @@ this.time=day.datetime;
 }
 
 function handelParkReq(req,res){
-const url=`https://developer.nps.gov/api/v1/parks?q=${req.query.city}&api_key=${PARKS_API_KEY}&limit=10`;
+const url=`https://developer.nps.gov/api/v1/parks?api_key=${PARKS_API_KEY}&limit=10`;
 superagent.get(url).then(resData=> {
 const arryOfParks=[];
 resData.body.data.map(element=> {
@@ -98,16 +81,19 @@ res.send(arryOfParks);
   res.send('Sorry, something went wrong');
 });
 }
+
 function Parks(data){
   this.name = data.name;
-  this.address=`${data.addresses[0].linel} ${data.addresses[0].city} ${data.addresses[0].stateCode} ${data.addresses[0].postalCode}`;
-  // this.address=Object.values(data.addresses[0]).join(',');
+  this.address=data.addresses[0].line1 + ',' + data.addresses[0].city + ',' + data.addresses[0].stateCode + ',' + data.addresses[0].postalCode;
   this.fee =data.fees[0]||'0.00';
   this.description=data.description;
   this.url=data.url;
 }
+
 app.use('*' , function(req , res){
   res.send('noting to show here');
 });
 
 app.listen(PORT, () => console.log(`Listening to Port ${PORT}`));//start point for the application"initialisation"
+
+
