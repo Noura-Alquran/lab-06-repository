@@ -22,6 +22,7 @@ const client = new pg.Client({
     rejectUnauthorized: false
   }
 });
+
 // const client = new pg.Client(process.env.DATABASE_URL);
 
 app.get('/location',handelLocationReq);
